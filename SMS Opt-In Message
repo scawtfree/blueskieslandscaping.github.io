@@ -1,0 +1,19 @@
+<div class="card">
+
+  <h3>Example Opt-In Confirmation Message</h3>
+
+  <p>
+    Blue Skies Landscaping:
+    Thanks for contacting us. You’ve opted in to receive
+    conversational SMS messages regarding estimates,
+    scheduling, service updates, and customer support.
+  </p>
+
+  <p>
+    Message frequency may vary.
+    Message and data rates may apply.
+    Reply STOP to unsubscribe.
+    Reply HELP for assistance.
+  </p>
+
+</div>
