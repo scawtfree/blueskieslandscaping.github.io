@@ -1,202 +1,330 @@
-import { useMemo, useState } from "react";
-import axios from "axios";
-import PublicLayout from "@/components/PublicLayout";
-import { CheckCircle2, MessageSquare, ShieldCheck } from "lucide-react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+  <title>Blue Sky Landscaping SMS Consent</title>
 
-export const CONSENT_TEXT =
-  "I agree to receive SMS messages from Blue Sky Landscaping regarding estimates, scheduling, " +
-  "service updates, and customer support. Message frequency may vary. Message and data rates may apply. " +
-  "Reply STOP to unsubscribe or HELP for assistance.";
+  <style>
 
-export default function Intake() {
-  const [name, setName]       = useState("");
-  const [phone, setPhone]     = useState("");
-  const [message, setMessage] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted]   = useState(false);
-  const [error, setError]     = useState("");
-
-  const canSubmit = useMemo(
-    () => name.trim().length >= 2 && phone.replace(/\D/g, "").length >= 10 && consent && !submitting,
-    [name, phone, consent, submitting]
-  );
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (!canSubmit) {
-      if (!consent) setError("You must check the SMS consent box to submit.");
-      return;
+    * {
+      box-sizing: border-box;
     }
-    setSubmitting(true);
-    try {
-      await axios.post(`${API}/intake`, {
-        name: name.trim(),
-        phone: phone.trim(),
-        message: message.trim(),
-        consent: true,
-        consent_text: CONSENT_TEXT,
-      }, { timeout: 15000 });
-      setSubmitted(true);
-    } catch (err) {
-      const code = err?.response?.data?.error;
-      setError(
-        code === "phone_invalid" ? "Please enter a valid 10-digit phone number."
-        : code === "consent_required" ? "You must check the SMS consent box."
-        : "Something went wrong — please try again or call us directly."
-      );
-    } finally {
-      setSubmitting(false);
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f3;
+      color: #1d1d1d;
+      line-height: 1.6;
     }
-  };
 
-  if (submitted) {
-    return (
-      <PublicLayout>
-        <div className="max-w-2xl mx-auto px-5 py-16">
-          <div className="card-surface p-8 text-center" data-testid="intake-success">
-            <CheckCircle2 size={42} className="mx-auto text-[hsl(var(--status-qualified))] mb-3" />
-            <h1 className="text-3xl font-black tracking-tight">Thanks — we've got it.</h1>
-            <p className="text-muted-foreground mt-2">
-              We'll send you a text shortly to confirm your service request and gather a few details so we can put a price range together.
-            </p>
-            <p className="mt-4 text-[12px] text-muted-foreground">
-              You consented to SMS messaging on {new Date().toLocaleString()}. Reply <span className="font-mono font-semibold">STOP</span> anytime to unsubscribe.
-            </p>
-          </div>
-        </div>
-      </PublicLayout>
-    );
-  }
+    .hero {
+      background: linear-gradient(135deg, #114b22, #1d6a33);
+      color: white;
+      padding: 50px 20px;
+    }
 
-  return (
-    <PublicLayout>
-      <div className="max-w-3xl mx-auto px-5 py-10 md:py-14" data-testid="intake-page">
-        <section className="mb-8">
-          <div className="mono-label mb-1">Customer intake</div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-            Tell us about your project.
-          </h1>
-          <p className="text-muted-foreground mt-3 max-w-xl text-[15px]">
-            Send us your name and number — we'll text back with a preliminary estimate
-            and schedule the work that fits your timeline.
-          </p>
+    .hero-inner {
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
 
-          <div className="flex flex-wrap gap-2 mt-5">
-            <span className="pill bg-secondary text-secondary-foreground"><MessageSquare size={11} /> SMS-first</span>
-            <span className="pill bg-secondary text-secondary-foreground"><ShieldCheck size={11} /> Privacy-respecting</span>
-            <span className="pill bg-secondary text-secondary-foreground">No spam</span>
-          </div>
-        </section>
+    .brand h1 {
+      margin: 0;
+      font-size: 42px;
+    }
 
-        <form onSubmit={submit} className="card-surface p-6 md:p-8 space-y-5" data-testid="intake-form" noValidate>
-          <div>
-            <label htmlFor="name" className="mono-label">Your name</label>
-            <input
-              id="name"
-              data-testid="intake-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              autoComplete="name"
-              className="mt-1.5 w-full bg-transparent border border-border rounded-md px-3 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="Jane Doe"
-            />
-          </div>
+    .brand p {
+      margin-top: 10px;
+      opacity: 0.9;
+      font-size: 18px;
+    }
 
-          <div>
-            <label htmlFor="phone" className="mono-label">Mobile number</label>
-            <input
-              id="phone"
-              data-testid="intake-phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              autoComplete="tel"
-              inputMode="tel"
-              pattern="[\d\s\-().+]{10,20}"
-              className="mt-1.5 w-full bg-transparent border border-border rounded-md px-3 py-2.5 text-[15px] font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              placeholder="(555) 555-5555"
-            />
-            <p className="text-[12px] text-muted-foreground mt-1">
-              We'll only text you about the service you request below.
-            </p>
-          </div>
+    .secure-box {
+      background: rgba(255,255,255,0.12);
+      padding: 16px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+    }
 
-          <div>
-            <label htmlFor="message" className="mono-label">What can we help with? <span className="text-muted-foreground/70 normal-case tracking-normal font-sans">(optional)</span></label>
-            <textarea
-              id="message"
-              data-testid="intake-message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={3}
-              maxLength={600}
-              className="mt-1.5 w-full bg-transparent border border-border rounded-md px-3 py-2.5 text-[15px] focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-              placeholder="e.g. mulching for front beds, drainage for backyard, fall aeration & overseeding…"
-            />
-          </div>
+    .container {
+      max-width: 850px;
+      margin: -40px auto 40px;
+      padding: 0 20px;
+    }
 
-          <div className="bg-secondary/50 border border-border rounded-md p-4">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                data-testid="intake-consent"
-                type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-                required
-                className="mt-1 w-4 h-4 accent-[hsl(var(--primary))] flex-shrink-0"
-              />
-              <span className="text-[13px] leading-relaxed text-foreground">
-                {CONSENT_TEXT}
-              </span>
-            </label>
-          </div>
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 35px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+      margin-bottom: 28px;
+    }
 
-          {error && (
-            <div data-testid="intake-error" className="text-[13px] text-[hsl(var(--status-disqualified))] bg-[hsl(var(--status-disqualified)/0.08)] border border-[hsl(var(--status-disqualified)/0.3)] rounded-md px-3 py-2">
-              {error}
-            </div>
-          )}
+    h2 {
+      margin-top: 0;
+      color: #114b22;
+      font-size: 38px;
+    }
 
-          <button
-            type="submit"
-            data-testid="intake-submit"
-            disabled={!canSubmit}
-            className="btn-primary w-full py-3 text-[15px] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? "Submitting…" : "Request my estimate"}
-          </button>
+    .success-box {
+      background: #eef7ee;
+      border-left: 6px solid #1d6a33;
+      padding: 18px;
+      border-radius: 10px;
+      margin-top: 25px;
+    }
 
-          <p className="text-[12px] text-muted-foreground text-center">
-            By submitting you agree to our{" "}
-            <a href="/terms" className="underline hover:text-foreground">Terms</a> and{" "}
-            <a href="/privacy" className="underline hover:text-foreground">Privacy Policy</a>.
-          </p>
-        </form>
+    .section-title {
+      color: #114b22;
+      margin-bottom: 8px;
+      font-size: 34px;
+    }
 
-        <section className="mt-8 grid md:grid-cols-2 gap-4 text-[13px]" data-testid="sms-disclosure">
-          <div className="card-surface p-5">
-            <div className="mono-label mb-1">How we use SMS</div>
-            <p className="text-foreground/80">
-              We send transactional and customer-care messages: estimate confirmations, scheduling reminders, on-the-way notifications, invoices, and short customer-service replies.
-            </p>
-          </div>
-          <div className="card-surface p-5">
-            <div className="mono-label mb-1">Opt-out anytime</div>
-            <p className="text-foreground/80">
-              Reply <span className="font-mono font-semibold">STOP</span> to any of our messages to unsubscribe.
-              Reply <span className="font-mono font-semibold">HELP</span> for assistance. Message frequency varies. Message &amp; data rates may apply.
-            </p>
-          </div>
-        </section>
+    .subtext {
+      color: #555;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #d2d2d2;
+      border-radius: 10px;
+      margin-bottom: 22px;
+      font-size: 16px;
+    }
+
+    textarea {
+      min-height: 140px;
+      resize: vertical;
+    }
+
+    .consent {
+      background: #f3f8f3;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 24px;
+      border: 1px solid #d7e7d7;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .checkbox-row input {
+      width: auto;
+      margin-top: 5px;
+    }
+
+    button {
+      width: 100%;
+      background: linear-gradient(135deg, #114b22, #1d6a33);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .footer-grid h3 {
+      color: #114b22;
+      margin-top: 0;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+
+      .brand h1 {
+        font-size: 32px;
+      }
+
+      h2,
+      .section-title {
+        font-size: 28px;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <section class="hero">
+
+    <div class="hero-inner">
+
+      <div class="brand">
+        <h1>Blue Sky Landscaping</h1>
+        <p>Reliable. Professional. Local.</p>
       </div>
-    </PublicLayout>
-  );
-}
+
+      <div class="secure-box">
+        Your information is secure and never shared.
+      </div>
+
+    </div>
+
+  </section>
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>Thanks — we’ve got it.</h2>
+
+      <p>
+        We’ll send you a text shortly to confirm your service request
+        and gather a few details so we can put a price range together.
+      </p>
+
+      <div class="success-box">
+        <strong>
+          You consent to receive SMS messages from Blue Sky Landscaping.
+        </strong>
+        <br><br>
+        Reply STOP anytime to unsubscribe.
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <h2 class="section-title">Tell us about your project.</h2>
+
+      <p class="subtext">
+        Send us your name and number — we’ll text back with a preliminary estimate
+        and schedule the work that fits your timeline.
+      </p>
+
+      <form>
+
+        <label>Your name *</label>
+        <input type="text" placeholder="Jane Doe" required>
+
+        <label>Mobile number *</label>
+        <input type="tel" placeholder="(555) 555-5555" required>
+
+        <label>What can we help with? (optional)</label>
+        <textarea placeholder="Lawn mowing, mulch installation, shrub trimming, landscape cleanup..."></textarea>
+
+        <div class="consent">
+
+          <div class="checkbox-row">
+
+            <input type="checkbox" required>
+
+            <div>
+              I agree to receive conversational SMS messages from
+              Blue Sky Landscaping regarding estimates, scheduling,
+              service updates, and customer support.
+
+              <br><br>
+
+              Message frequency may vary.
+              Message and data rates may apply.
+              Reply STOP to unsubscribe.
+              Reply HELP for assistance.
+            </div>
+
+          </div>
+
+        </div>
+
+        <button type="submit">
+          Send Request
+        </button>
+
+      </form>
+
+    </div>
+
+    <div class="card footer-grid">
+
+      <div>
+
+        <h3>SMS Disclosure</h3>
+
+        <ul>
+          <li>Message frequency may vary</li>
+          <li>Message and data rates may apply</li>
+          <li>Reply STOP to unsubscribe</li>
+          <li>Reply HELP for assistance</li>
+        </ul>
+
+      </div>
+
+      <div>
+
+        <h3>About Blue Sky Landscaping</h3>
+
+        <p>
+          Local landscaping and outdoor services for residential
+          and commercial properties.
+        </p>
+
+        <p>
+          Contact: blueskieslandscaping@protonmail.com
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <footer>
+    © 2026 Blue Sky Landscaping. All rights reserved.
+  </footer>
+
+</body>
+</html>
